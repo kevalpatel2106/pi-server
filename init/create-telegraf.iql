@@ -1,0 +1,3 @@
+REATE DATABASE telegraf WITH DURATION '30d'
+ CREATE USER telegraf WITH PASSWORD 'admin'
+ GRANT WRITE ON telegraf to telegraf
