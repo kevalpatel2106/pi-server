@@ -1,0 +1,5 @@
+etc-dnsmasq.d/
+etc-pihole/
+.DS_Store
+3000
+data/
