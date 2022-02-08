@@ -30,7 +30,5 @@ jobs:
         run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:9798 >/dev/null; do sleep 1; done
       - name: Test Pi-hole
         run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:80 >/dev/null; do sleep 1; done
-      - name: Test Graphana
-        run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:3030 >/dev/null; do sleep 1; done
       - name: Test Portainer
         run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:9000 >/dev/null; do sleep 1; done
