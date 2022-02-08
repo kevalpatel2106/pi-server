@@ -126,16 +126,20 @@ services:
   
   pihole:
     container_name: pihole
+    privileged: true
     image: pihole/pihole:latest
     restart: unless-stopped
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "67:67/udp"
-      - "80:80/tcp"
+    network_mode: host
     environment:
+      ServerIP: 192.168.0.5
       TZ: ‘Europe/London’
       WEBPASSWORD: piserver
+    # ports:
+    #   - 443/tcp
+    #   - 53/tcp
+    #   - 53/udp
+    #   - 67/udp
+    #   - 80/tcp
     # Volumes store your data between container upgrades
     volumes:
       - '~/etc-pihole/:/etc/pihole/'
