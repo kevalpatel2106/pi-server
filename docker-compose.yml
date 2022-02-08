@@ -3,6 +3,8 @@ version: "3.1"
 volumes:
     prometheus_data: {}
     grafana_data: {}
+    portainer_data: {}
+    influxdb_data: {}
 
 networks:
   front-tier:
@@ -15,7 +17,7 @@ services:
     networks:
       - back-tier
     volumes:
-      - ./data:/var/lib/influxdb
+      - influxdb_data:/var/lib/influxdb
       - ./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
       - ./init:/docker-entrypoint-initdb.d
   
@@ -118,6 +120,17 @@ services:
     networks:
       - back-tier
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - 9000:9000
+    networks:
+      - back-tier
+  
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
@@ -132,8 +145,8 @@ services:
       WEBPASSWORD: piserver
     # Volumes store your data between container upgrades
     volumes:
-      - './etc-pihole/:/etc/pihole/'
-      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+      - '~/etc-pihole/:/etc/pihole/'
+      - '~/etc-dnsmasq.d/:/etc/dnsmasq.d/'
     # Recommended but not required (DHCP needs NET_ADMIN)
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     cap_add:
