@@ -17,6 +17,7 @@ sudo pip3 install docker-compose
 
 # Initialise docker on restart
 sudo systemctl enable docker
+echo " systemd.unified_cgroup_hierarchy=0 cgroup_enable=memory cgroup_memory=1" >> /boot/cmdline.txt
 
 # Start building docker stack
 docker-compose up -d

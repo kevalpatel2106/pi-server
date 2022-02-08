@@ -4,41 +4,12 @@ volumes:
     prometheus_data: {}
     grafana_data: {}
     portainer_data: {}
-    influxdb_data: {}
 
 networks:
   front-tier:
   back-tier:
 
 services:   
-  influxdb:
-    image: influxdb:1.8.9 # latest influxdb compatible with 32 bits processors
-    restart: always
-    networks:
-      - back-tier
-    volumes:
-      - influxdb_data:/var/lib/influxdb
-      - ./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
-      - ./init:/docker-entrypoint-initdb.d
-  
-  telegraf:
-    image: telegraf:1.9.3
-    restart: always
-    networks:
-      - back-tier
-    depends_on:
-      - influxdb
-    volumes:
-      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro   
-      - /:/hostfs:ro
-    environment:
-      - HOST_ETC=/hostfs/etc
-      - HOST_PROC=/hostfs/proc
-      - HOST_SYS=/hostfs/sys
-      - HOST_VAR=/hostfs/var
-      - HOST_RUN=/hostfs/run
-      - HOST_MOUNT_PREFIX=/hostfs
-  
   prometheus:
     image: prom/prometheus:v2.25.2
     restart: unless-stopped
@@ -130,6 +101,28 @@ services:
       - 9000:9000
     networks:
       - back-tier
+  
+  cadvisor:
+    image: zcube/cadvisor:latest
+    privileged: true
+    restart: unless-stopped
+    ipc: shareable
+    hostname: rpi-cadvisor
+    devices:
+      - /dev/kmsg
+    expose:
+      - 8080
+    networks:
+      - back-tier
+    security_opt:
+      - label=disable
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
   
   pihole:
     container_name: pihole

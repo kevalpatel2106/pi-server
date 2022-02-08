@@ -48,12 +48,3 @@ datasources:
   version: 1
   # <bool> allow users to edit datasources from the UI.
   editable: true
-
-- name: InfluxDB
-  type: influxdb
-  access: proxy
-  url: http://influxdb:8086
-  database: telegraf
-  basicAuth: false
-  version: 1
-  editable: true
