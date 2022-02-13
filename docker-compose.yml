@@ -4,12 +4,67 @@ volumes:
     prometheus_data: {}
     grafana_data: {}
     portainer_data: {}
+    influxdb_data: {}
 
 networks:
   front-tier:
   back-tier:
 
-services:   
+services:  
+  # =================================================================================
+  # ==================== Containers related to graphana monitors ====================
+  # =================================================================================
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    depends_on:
+      - prometheus
+      - influxdb
+    ports:
+      - 3030:3000
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      - back-tier
+      - front-tier
+
+  # ----------------------- Influxdb base monitors -----------------------
+  influxdb:
+    image: influxdb:1.8.5
+    environment:
+      INFLUXDB_DB: energy
+    ports:
+      - 8086:8086
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    networks:
+      - back-tier
+
+  octopusenergy-monitor:
+    tty: true
+    stdin_open: true
+    image: ghcr.io/kevalpatel2106/octopus-consumption-minitor:latest
+    restart: unless-stopped
+    environment:
+      INFLUX_DB_NAME: energy
+      INFLUX_DB_HOST: influxdb
+      INFLUX_DB_PORT: 8086
+      OCTOPUS_API_KEY: sk_live
+      OCTOPUS_ACCOUNT_NO: A-123456
+      ELECTRICITY_MPAN: 220000000000
+      ELECTRICITY_SERIAL_NO: 22L3887905
+      GS_MPAN: 4189671708
+      GAS_SERIAL_NO: E6S18826742181
+      VOLUME_CORRECTION_FACTOR: 11.63580247
+    networks:
+      - back-tier
+    depends_on:
+      - influxdb
+
+  # ----------------------- Prometheus base monitors -----------------------
   prometheus:
     image: prom/prometheus:v2.25.2
     restart: unless-stopped
@@ -26,50 +81,7 @@ services:
     links:
       - ping:ping
       - speedtest:speedtest
-    networks:
-      - back-tier
-
-  grafana:
-    image: grafana/grafana
-    restart: unless-stopped
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
-    depends_on:
-      - prometheus
-    ports:
-      - 3030:3000
-    env_file:
-      - ./grafana/config.monitoring
-    networks:
-      - back-tier
-      - front-tier
-
-  ping:
-    tty: true
-    stdin_open: true
-    expose:
-      - 9115
-    ports:
-      - 9115:9115
-    image: prom/blackbox-exporter
-    restart: unless-stopped
-    volumes:
-      - ./blackbox/config:/config
-    command:
-      - '--config.file=/config/blackbox.yml'
-    networks:
-      - back-tier
-
-  speedtest:
-    tty: true
-    stdin_open: true
-    expose:
-      - 9798
-    ports:
-      - 9798:9798
-    image: miguelndecarvalho/speedtest-exporter
-    restart: unless-stopped
+      - cadvisor:cadvisor
     networks:
       - back-tier
 
@@ -91,17 +103,6 @@ services:
     networks:
       - back-tier
 
-  portainer:
-    image: portainer/portainer-ce:latest
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    ports:
-      - 9000:9000
-    networks:
-      - back-tier
-  
   cadvisor:
     image: zcube/cadvisor:latest
     privileged: true
@@ -124,6 +125,52 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
   
+  ping:
+    tty: true
+    stdin_open: true
+    expose:
+      - 9115
+    ports:
+      - 9115:9115
+    image: prom/blackbox-exporter
+    restart: unless-stopped
+    volumes:
+      - ./blackbox/config:/config
+    command:
+      - '--config.file=/config/blackbox.yml'
+    networks:
+      - back-tier
+  
+  speedtest:
+    tty: true
+    stdin_open: true
+    expose:
+      - 9798
+    ports:
+      - 9798:9798
+    image: miguelndecarvalho/speedtest-exporter
+    restart: unless-stopped
+    networks:
+      - back-tier
+
+  # =================================================================================
+  # ===================== Portainer: Docker containers manager ======================
+  # =================================================================================
+  portainer:
+    image: portainer/portainer-ce:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - 9000:9000
+    networks:
+      - back-tier
+
+    
+  # =================================================================================
+  # ========================== PiHole : DNS and DCHP server =========================
+  # =================================================================================
   pihole:
     container_name: pihole
     privileged: true
@@ -134,12 +181,6 @@ services:
       ServerIP: 192.168.0.5
       TZ: ‘Europe/London’
       WEBPASSWORD: piserver
-    # ports:
-    #   - 443/tcp
-    #   - 53/tcp
-    #   - 53/udp
-    #   - 67/udp
-    #   - 80/tcp
     # Volumes store your data between container upgrades
     volumes:
       - '~/etc-pihole/:/etc/pihole/'

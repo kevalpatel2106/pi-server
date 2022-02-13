@@ -9,3 +9,14 @@ providers:
   editable: true
   options:
     path: /etc/grafana/provisioning/dashboards
+
+- name: 'InfluxDB'
+  orgId: 1
+  folder: ''
+  type: file
+  disableDeletion: false
+  editable: true
+  allowUiUpdates: true
+  updateIntervalSeconds: 300  # How often Grafana scans for changed dashboards
+  options:
+    path: /etc/grafana/provisioning/dashboards
