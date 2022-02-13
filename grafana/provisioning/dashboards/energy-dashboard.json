@@ -21,7 +21,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -45,7 +44,7 @@
               }
             ]
           },
-          "unit": "kwatt"
+          "unit": "m3"
         },
         "overrides": []
       },
@@ -70,7 +69,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.0-beta1",
+      "pluginVersion": "8.3.6",
       "targets": [
         {
           "datasource": {
@@ -100,7 +99,7 @@
             [
               {
                 "params": [
-                  "consumption"
+                  "raw_consumption"
                 ],
                 "type": "field"
               },
@@ -136,7 +135,7 @@
               }
             ]
           },
-          "unit": "kwatt"
+          "unit": "m3"
         },
         "overrides": []
       },
@@ -161,7 +160,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.0-beta1",
+      "pluginVersion": "8.3.6",
       "targets": [
         {
           "datasource": {
@@ -191,7 +190,7 @@
             [
               {
                 "params": [
-                  "consumption"
+                  "raw_consumption"
                 ],
                 "type": "field"
               },
@@ -258,7 +257,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.0-beta1",
+      "pluginVersion": "8.3.6",
       "targets": [
         {
           "datasource": {
@@ -350,7 +349,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.4.0-beta1",
+      "pluginVersion": "8.3.6",
       "targets": [
         {
           "datasource": {
@@ -701,14 +700,14 @@
         "type": "influxdb",
         "uid": "P951FEA4DE68E13C5"
       },
-      "description": "Gas usage in kW.",
+      "description": "Gas usage in m3.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "axisLabel": "kW",
+            "axisLabel": "m3",
             "axisPlacement": "left",
             "barAlignment": 0,
             "drawStyle": "bars",
@@ -758,7 +757,7 @@
         "x": 0,
         "y": 16
       },
-      "id": 16,
+      "id": 6,
       "options": {
         "legend": {
           "calcs": [],
@@ -799,7 +798,7 @@
             [
               {
                 "params": [
-                  "consumption"
+                  "raw_consumption"
                 ],
                 "type": "field"
               },
@@ -939,14 +938,14 @@
         "type": "influxdb",
         "uid": "P951FEA4DE68E13C5"
       },
-      "description": "Gas usage in m3.",
+      "description": "Gas usage in kW.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "axisLabel": "m3",
+            "axisLabel": "kW",
             "axisPlacement": "left",
             "barAlignment": 0,
             "drawStyle": "bars",
@@ -996,7 +995,7 @@
         "x": 0,
         "y": 25
       },
-      "id": 6,
+      "id": 16,
       "options": {
         "legend": {
           "calcs": [],
@@ -1037,7 +1036,7 @@
             [
               {
                 "params": [
-                  "raw_consumption"
+                  "consumption"
                 ],
                 "type": "field"
               },
@@ -1055,7 +1054,7 @@
     }
   ],
   "refresh": "1d",
-  "schemaVersion": 35,
+  "schemaVersion": 34,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1067,8 +1066,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Energy Usage Dashboard",
+  "title": "Home Energy Dashboard",
   "uid": "sLHW49anz",
-  "version": 2,
+  "version": 4,
   "weekStart": ""
 }

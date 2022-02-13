@@ -59,6 +59,7 @@ services:
       GS_MPAN: 4189671708
       GAS_SERIAL_NO: E6S18826742181
       VOLUME_CORRECTION_FACTOR: 11.63580247
+      SERIES_START_DATE: "2022-01-16"
     networks:
       - back-tier
     depends_on:
