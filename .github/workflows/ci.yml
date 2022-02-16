@@ -8,10 +8,11 @@ jobs:
   test:
     name: Build docker image and test.
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Docker pull
+      - name: Set up environment variables
         run: |
           touch config.env
           echo "${{ secrets.CONFIGS }}" >> config.env
@@ -23,7 +24,7 @@ jobs:
           sudo systemctl stop systemd-resolved
           sudo systemctl disable systemd-resolved
           docker-compose up -d
-          sleep 5
+          sleep 10
           docker ps
       - name: Test Prometheus
         run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:9090 >/dev/null; do sleep 1; done
@@ -33,8 +34,8 @@ jobs:
         run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:9115 >/dev/null; do sleep 1; done
       - name: Test Speedtest exporter
         run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:9798 >/dev/null; do sleep 1; done
-      # - name: Test Pi-hole
-      #   run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:80 >/dev/null; do sleep 1; done
+      - name: Test nignix proxy manager
+        run: while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -v http://127.0.0.1:81 >/dev/null; do sleep 1; done
       - name: Test influxdb set
         run : while ! curl --retry 10 --connect-timeout 5 --retry-delay 5 --retry-max-time 40 -G http://127.0.0.1:8086/query --data-urlencode "q=SHOW DATABASES"> /dev/null; do sleep 1; done
       - name: Test Portainer

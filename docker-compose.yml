@@ -12,50 +12,19 @@ networks:
 
 services:  
   # =================================================================================
-  # ==================== Containers related to graphana monitors ====================
+  # ================================= DBs ===========================================
   # =================================================================================
-  grafana:
-    image: grafana/grafana
-    restart: unless-stopped
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
-    depends_on:
-      - prometheus
-      - influxdb
-    ports:
-      - 3030:3000
-    env_file:
-      - ./config.env
-    networks:
-      - back-tier
-      - front-tier
-
-  # ----------------------- Influxdb base monitors -----------------------
   influxdb:
     image: influxdb:1.8.5
-    environment:
-      INFLUXDB_DB: energy
     ports:
       - 8086:8086
     volumes:
       - influxdb_data:/var/lib/influxdb
     networks:
       - back-tier
-
-  octopusenergy-exporter:
-    tty: true
-    stdin_open: true
-    image: ghcr.io/kevalpatel2106/octopus-consumption-exporter:latest
-    restart: unless-stopped
     env_file:
       - ./config.env
-    networks:
-      - back-tier
-    depends_on:
-      - influxdb
 
-  # ----------------------- Prometheus base monitors -----------------------
   prometheus:
     image: prom/prometheus:v2.25.2
     restart: unless-stopped
@@ -76,6 +45,102 @@ services:
     networks:
       - back-tier
 
+  mariadb:
+    image: yobasystems/alpine-mariadb:latest
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - back-tier
+    env_file:
+      - ./config.env
+
+  # =================================================================================
+  # ================================= Applications ==================================
+  # =================================================================================
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    depends_on:
+      - prometheus
+      - influxdb
+    ports:
+      - 3030:3000
+    networks:
+      - back-tier
+      - front-tier
+    env_file:
+      - ./config.env
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - 9000:9000
+    networks:
+      - back-tier
+
+  pihole:
+    container_name: pihole
+    privileged: true
+    image: pihole/pihole:latest
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - '~/etc-pihole/:/etc/pihole/'
+      - '~/etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    cap_add:
+      - NET_ADMIN # Required for running DCHP server
+    env_file:
+      - ./config.env
+  
+  nginx:
+    container_name: nginx
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'   # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81'   # Admin Web Port
+      # - '21:21' # FTP
+    volumes:
+      - '~/data:/data'
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - mariadb
+    networks:
+      - front-tier
+      - back-tier
+    env_file:
+      - ./config.env
+
+  # =================================================================================
+  # ============================= Graphana Exporters ================================
+  # =================================================================================
+  
+  # ----------------------- Influxdb base monitors -----------------------
+  octopusenergy-exporter:
+    tty: true
+    stdin_open: true
+    image: ghcr.io/kevalpatel2106/octopus-consumption-exporter:latest
+    restart: unless-stopped
+    networks:
+      - back-tier
+    depends_on:
+      - influxdb
+    env_file:
+      - ./config.env
+
+  # ----------------------- Prometheus base monitors -----------------------
   nodeexp:
     privileged: true
     image: prom/node-exporter
@@ -143,35 +208,3 @@ services:
     restart: unless-stopped
     networks:
       - back-tier
-
-  # =================================================================================
-  # ===================== Portainer: Docker containers manager ======================
-  # =================================================================================
-  portainer:
-    image: portainer/portainer-ce:latest
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    ports:
-      - 9000:9000
-    networks:
-      - back-tier
-
-    
-  # =================================================================================
-  # ========================== PiHole : DNS and DCHP server =========================
-  # =================================================================================
-  pihole:
-    container_name: pihole
-    privileged: true
-    image: pihole/pihole:latest
-    restart: unless-stopped
-    network_mode: host
-    env_file:
-      - ./config.env
-    volumes:
-      - '~/etc-pihole/:/etc/pihole/'
-      - '~/etc-dnsmasq.d/:/etc/dnsmasq.d/'
-    cap_add:
-      - NET_ADMIN # Required for running DCHP server
