@@ -11,10 +11,15 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Build
-        # Fixing DNS Port clash https://github.com/sameersbn/docker-bind/issues/65
+      - name: Docker pull
         run: |
-          docker-compose pull
+          touch config.env
+          echo "${{ secrets.CONFIGS }}" >> config.env
+      - name: Docker pull
+        run: docker-compose pull
+        # Fixing DNS Port clash https://github.com/sameersbn/docker-bind/issues/65
+      - name: Docker Build
+        run: |
           sudo systemctl stop systemd-resolved
           sudo systemctl disable systemd-resolved
           docker-compose up -d
