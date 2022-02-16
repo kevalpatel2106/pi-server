@@ -26,7 +26,7 @@ services:
     ports:
       - 3030:3000
     env_file:
-      - ./grafana/config.monitoring
+      - ./config.env
     networks:
       - back-tier
       - front-tier
@@ -48,17 +48,8 @@ services:
     stdin_open: true
     image: ghcr.io/kevalpatel2106/octopus-consumption-exporter:latest
     restart: unless-stopped
-    environment:
-      INFLUX_DB_NAME: energy
-      INFLUX_DB_HOST: influxdb
-      INFLUX_DB_PORT: 8086
-      OCTOPUS_API_KEY: sk_live
-      ELECTRICITY_MPAN: 220000000000
-      ELECTRICITY_SERIAL_NO: 22L3887905
-      GS_MPAN: 4189671708
-      GAS_SERIAL_NO: E6S18826742181
-      VOLUME_CORRECTION_FACTOR: 11.63580247
-      SERIES_START_DATE: "2022-01-16"
+    env_file:
+      - ./config.env
     networks:
       - back-tier
     depends_on:
@@ -177,15 +168,10 @@ services:
     image: pihole/pihole:latest
     restart: unless-stopped
     network_mode: host
-    environment:
-      ServerIP: 192.168.0.5
-      TZ: ‘Europe/London’
-      WEBPASSWORD: piserver
-    # Volumes store your data between container upgrades
+    env_file:
+      - ./config.env
     volumes:
       - '~/etc-pihole/:/etc/pihole/'
       - '~/etc-dnsmasq.d/:/etc/dnsmasq.d/'
-    # Recommended but not required (DHCP needs NET_ADMIN)
-    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     cap_add:
-      - NET_ADMIN
+      - NET_ADMIN # Required for running DCHP server
