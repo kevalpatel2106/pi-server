@@ -43,17 +43,16 @@ services:
     networks:
       - back-tier
 
-  octopusenergy-monitor:
+  octopusenergy-exporter:
     tty: true
     stdin_open: true
-    image: ghcr.io/kevalpatel2106/octopus-consumption-minitor:latest
+    image: ghcr.io/kevalpatel2106/octopus-consumption-exporter:latest
     restart: unless-stopped
     environment:
       INFLUX_DB_NAME: energy
       INFLUX_DB_HOST: influxdb
       INFLUX_DB_PORT: 8086
       OCTOPUS_API_KEY: sk_live
-      OCTOPUS_ACCOUNT_NO: A-123456
       ELECTRICITY_MPAN: 220000000000
       ELECTRICITY_SERIAL_NO: 22L3887905
       GS_MPAN: 4189671708
