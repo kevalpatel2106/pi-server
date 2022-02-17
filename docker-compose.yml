@@ -123,6 +123,14 @@ services:
     env_file:
       - ./config.env
 
+  fan-controller:
+    container_name: fan-controller
+    image:  ghcr.io/kevalpatel2106/pi-fan-controller:latest
+    devices:
+      - /dev/gpiomem
+    env_file:
+      - ./config.env
+
   # =================================================================================
   # ============================= Graphana Exporters ================================
   # =================================================================================
