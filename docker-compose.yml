@@ -15,6 +15,7 @@ services:
   # ================================= DBs ===========================================
   # =================================================================================
   influxdb:
+    container_name: influxdb
     image: influxdb:1.8.5
     ports:
       - 8086:8086
@@ -26,6 +27,7 @@ services:
       - ./config.env
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:v2.25.2
     restart: unless-stopped
     volumes:
@@ -46,6 +48,7 @@ services:
       - back-tier
 
   mariadb:
+    container_name: mariadb
     image: yobasystems/alpine-mariadb:latest
     restart: unless-stopped
     ports:
@@ -130,6 +133,17 @@ services:
       - /dev/gpiomem
     env_file:
       - ./config.env
+  
+  code-server:
+    image: lscr.io/linuxserver/code-server
+    container_name: code-server
+    env_file:
+      - ./config.env
+    volumes:
+      - '~/vs_code/config:/config'
+    ports:
+      - 8443:8443
+    restart: unless-stopped
 
   # =================================================================================
   # ============================= Graphana Exporters ================================
@@ -137,6 +151,7 @@ services:
   
   # ----------------------- Influxdb base monitors -----------------------
   octopusenergy-exporter:
+    container_name: octopusenergy-exp
     tty: true
     stdin_open: true
     image: ghcr.io/kevalpatel2106/octopus-consumption-exporter:latest
@@ -150,6 +165,7 @@ services:
 
   # ----------------------- Prometheus base monitors -----------------------
   nodeexp:
+    container_name: node-exp
     privileged: true
     image: prom/node-exporter
     restart: unless-stopped
@@ -168,6 +184,7 @@ services:
       - back-tier
 
   cadvisor:
+    container_name: cadvisor-exp
     image: zcube/cadvisor:latest
     privileged: true
     restart: unless-stopped
@@ -190,6 +207,7 @@ services:
       - /dev/disk/:/dev/disk:ro
   
   ping:
+    container_name: ping-exp
     tty: true
     stdin_open: true
     expose:
@@ -206,6 +224,7 @@ services:
       - back-tier
   
   speedtest:
+    container_name: speedtest-exp
     tty: true
     stdin_open: true
     expose:
