@@ -64,6 +64,7 @@ services:
   # ================================= Applications ==================================
   # =================================================================================
   grafana:
+    container_name: graphana
     image: grafana/grafana
     restart: unless-stopped
     volumes:
@@ -143,6 +144,14 @@ services:
       - '~/vs_code/config:/config'
     ports:
       - 8443:8443
+    restart: unless-stopped
+
+  duckdns:
+    image: maksimstojkovic/duckdns
+    container_name: duckdns
+    network_mode: host
+    env_file:
+      - ./config.env
     restart: unless-stopped
 
   # =================================================================================
