@@ -5,6 +5,9 @@ volumes:
     grafana_data: {}
     portainer_data: {}
     influxdb_data: {}
+    mariadb_data: {}
+    nginx_data: {}
+    vscode_data: {}
 
 networks:
   front-tier:
@@ -54,7 +57,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
     networks:
       - back-tier
     env_file:
@@ -117,8 +120,8 @@ services:
       - '81:81'   # Admin Web Port
       # - '21:21' # FTP
     volumes:
-      - '~/data:/data'
-      - ./letsencrypt:/etc/letsencrypt
+      - nginx_data:/data
+      - nginx_data:/etc/letsencrypt
     depends_on:
       - mariadb
     networks:
@@ -141,7 +144,7 @@ services:
     env_file:
       - ./config.env
     volumes:
-      - '~/vs_code/config:/config'
+      - vscode_data:/config
     ports:
       - 8443:8443
     restart: unless-stopped
