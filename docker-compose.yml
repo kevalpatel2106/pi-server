@@ -8,6 +8,7 @@ volumes:
     mariadb_data: {}
     nginx_data: {}
     vscode_data: {}
+    unbound_data: {}
 
 networks:
   front-tier:
@@ -95,7 +96,19 @@ services:
       - 9000:9000
     networks:
       - back-tier
+    depends_on:
+      - unbound
 
+  unbound:
+    container_name: unbound
+    image: klutchell/unbound
+    restart: unless-stopped
+    volumes:
+      - unbound_data:/opt/unbound/etc/unbound/
+    ports:
+      - 9001:53/udp
+      - 9001:53/tcp
+  
   pihole:
     container_name: pihole
     privileged: true
