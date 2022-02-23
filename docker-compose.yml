@@ -7,7 +7,6 @@ volumes:
     influxdb_data: {}
     mariadb_data: {}
     nginx_data: {}
-    vscode_data: {}
     unbound_data: {}
 
 networks:
@@ -150,17 +149,6 @@ services:
       - /dev/gpiomem
     env_file:
       - ./config.env
-  
-  code-server:
-    image: lscr.io/linuxserver/code-server
-    container_name: code-server
-    env_file:
-      - ./config.env
-    volumes:
-      - vscode_data:/config
-    ports:
-      - 8443:8443
-    restart: unless-stopped
 
   duckdns:
     image: maksimstojkovic/duckdns
@@ -219,6 +207,8 @@ services:
       - /dev/kmsg
     expose:
       - 8080
+    ports:
+      - 9002:8080
     networks:
       - back-tier
     security_opt:
